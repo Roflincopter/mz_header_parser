@@ -45,13 +45,13 @@ uint16_t parse<uint16_t>(std::istream& is, std::string name) {
 	if(!is) {
 		throw UnexpectedEOS();
 	}
-	char data[2];
+	char data[2] = {0, 0};
 	is.read(data, 2);
 	if(!is) {
 		throw UnexpectedEOS(name);
 	}
 	
-	return (data[1] << 8) | data[0];
+	return (((unsigned char) data[1]) << 8) | (unsigned char) data[0];
 }
 
 template<>
