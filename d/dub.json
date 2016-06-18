@@ -1,0 +1,6 @@
+{
+    "name": "mz_header_parser",
+    "targetName": "mz_header_parser",
+    "targetType": "executable",
+    "targetPath": "bin"
+}
