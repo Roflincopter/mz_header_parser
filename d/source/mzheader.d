@@ -7,17 +7,17 @@ import std.string;
 
 class NotAMZFileException : Exception {
 	this() {
-		super("This file is not an MZ file", __FILE__, __LINE__);
+		super("This file is not an MZ file");
 	}
 }
 
 class UnexpectedEOS : Exception {
 	this() {
-		super("Unexpected end of stream", __FILE__, __LINE__);
+		super("Unexpected end of stream");
 	}
 	
 	this(string location) {
-		super(format("%s: %s", "Unexpected end of stream after", location), __FILE__, __LINE__);
+		super(format("%s: %s", "Unexpected end of stream after", location));
 	}
 }
 
@@ -43,13 +43,19 @@ struct MZHeader {
 	ushort overlay_number;
 };
 
-T parse(T:ushort)(File file) {
-	auto buffer = file.rawRead(new char[2]);
+T parse(T:ushort)(File file, string name) {
+	enforce(!file.error, new UnexpectedEOS());
+	
+	char[2] inbuffer;
+	auto buffer = file.rawRead(inbuffer);
+	
+	enforce(!file.error && buffer.length == 2, new UnexpectedEOS(name));
+	
 	return (buffer[1] << 8) | buffer[0];
 }
 
-T parse(T:Magic)(File file) {
-	ushort s = parse!ushort(file);
+T parse(T:Magic)(File file, string name) {
+	ushort s = parse!ushort(file, name);
 	return Magic(s);
 }
 
@@ -59,7 +65,7 @@ MZHeader parse_mz_header(File f) {
 	
 	foreach(member; __traits(allMembers, MZHeader)) {
 		alias MT = typeof(__traits(getMember, header, member)); 
-		__traits(getMember, header, member) = parse!MT(f);
+		__traits(getMember, header, member) = parse!MT (f, member);
 	}
 	
 	return header;
